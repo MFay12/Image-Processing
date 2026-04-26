@@ -1,0 +1,193 @@
+def imagem_para_matriz_cinza(img_pil):
+    """
+    Converte a imagem em matriz e faz o Item 4: RGB para Escala de Cinza MANUALMENTE.
+    """
+    largura, altura = img_pil.size
+    
+    # Pedimos ao Pillow APENAS os pixels coloridos brutos (lista de tuplas R,G,B)
+    pixels_rgb = list(img_pil.convert('RGB').getdata())
+    
+    matriz_cinza = []
+    
+    for y in range(altura):
+        linha = []
+        for x in range(largura):
+            # Encontra a posição exata do pixel na lista plana
+            indice = (y * largura) + x
+            r, g, b = pixels_rgb[indice]
+            
+            # Aplica a fórmula matemática de luminosidade:
+            # Cinza = 0.299*R + 0.587*G + 0.114*B
+            cinza = int((0.299 * r) + (0.587 * g) + (0.114 * b))
+            linha.append(cinza)
+            
+        matriz_cinza.append(linha)
+        
+    return matriz_cinza
+
+def calcular_histograma(matriz):
+    """
+    Calcula a frequência de cada tom de cinza (0-255).
+    Retorna uma lista de 256 posições onde o índice é a intensidade 
+    e o valor é a quantidade de pixels.
+    """
+    histograma = [0] * 256
+    
+    for linha in matriz:
+        for pixel in linha:
+            # Incrementa a contagem para o valor do pixel encontrado
+            # Indice Inteiro
+            histograma[int(pixel)] += 1
+            
+    return histograma
+
+def threshold(matriz, limiar):
+    """Limiarização simples."""
+    altura = len(matriz)
+    largura = len(matriz[0])
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    for y in range(altura):
+        for x in range(largura):
+            saida[y][x] = 255 if matriz[y][x] > limiar else 0
+    return saida
+
+def calcular_otsu(matriz):
+    """Item 2: Algoritmo de Otsu para encontrar o limiar ótimo."""
+    altura = len(matriz)
+    largura = len(matriz[0])
+    total_pixels = largura * altura
+    
+    # 1. Utiliza a função modular já existente para pegar o histograma
+    histograma = calcular_histograma(matriz)
+            
+    sum_total = sum(i * histograma[i] for i in range(256))
+    
+    sum_back, w_back, w_fore = 0, 0, 0
+    max_variancia = 0.0
+    limiar_otimo = 0
+    
+    for t in range(256):
+        w_back += histograma[t]
+        if w_back == 0: continue
+        
+        w_fore = total_pixels - w_back
+        if w_fore == 0: break
+        
+        sum_back += t * histograma[t]
+        m_back = sum_back / w_back
+        m_fore = (sum_total - sum_back) / w_fore
+        
+        variancia_entre = w_back * w_fore * (m_back - m_fore) ** 2
+        
+        if variancia_entre > max_variancia:
+            max_variancia = variancia_entre
+            limiar_otimo = t
+            
+    return limiar_otimo
+
+def convolucao(matriz, kernel):
+    """Função base para filtros de vizinhança."""
+    altura = len(matriz)
+    largura = len(matriz[0])
+    n = len(kernel)
+    offset = n // 2
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+
+    for y in range(offset, altura - offset):
+        for x in range(offset, largura - offset):
+            soma = 0
+            for ky in range(n):
+                for kx in range(n):
+                    pixel = matriz[y - offset + ky][x - offset + kx]
+                    soma += pixel * kernel[ky][kx]
+            saida[y][x] = soma
+    return saida
+
+def passa_alta_basico(matriz):
+    """Filtro Passa-Alta usando o kernel Laplaciano."""
+    kernel = [
+        [-1, -1, -1],
+        [-1,  8, -1],
+        [-1, -1, -1]
+    ]
+    resultado = convolucao(matriz, kernel)
+    
+    # Normalizamos para garantir que a cor não passe de 255 nem fique negativa
+    for y in range(len(resultado)):
+        for x in range(len(resultado[0])):
+            resultado[y][x] = max(0, min(255, int(resultado[y][x])))
+    return resultado
+
+def passa_alta_Alto_reforco(matriz, A=1.5):
+   
+    bordas = passa_alta_basico(matriz)
+    altura = len(matriz)
+    largura = len(matriz[0])
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    for y in range(altura):
+        for x in range(largura):
+            valor = (A * matriz[y][x]) + bordas[y][x]
+            saida[y][x] = max(0, min(255, int(valor)))
+    return saida
+
+def passa_baixa_mediana(matriz, tamanho_mascara=3):
+   
+    altura = len(matriz)
+    largura = len(matriz[0])
+    offset = tamanho_mascara // 2
+    
+    # Cria a matriz de saída zerada
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Percorre a imagem ignorando as bordas para evitar erro de índice
+    for y in range(offset, altura - offset):
+        for x in range(offset, largura - offset):
+            vizinhanca = []
+            
+            # Coleta todos os pixels dentro da janela (máscara)
+            for ky in range(tamanho_mascara):
+                for kx in range(tamanho_mascara):
+                    pixel = matriz[y - offset + ky][x - offset + kx]
+                    vizinhanca.append(pixel)
+            
+            # Ordena os valores da vizinhança
+            vizinhanca.sort()
+            
+            # Pega o valor exato do meio da lista
+            indice_meio = len(vizinhanca) // 2
+            mediana = vizinhanca[indice_meio]
+            
+            # Atribui ao pixel central
+            saida[y][x] = mediana
+            
+    return saida
+
+def passa_baixa_media(matriz, tamanho_mascara=3):
+   
+    altura = len(matriz)
+    largura = len(matriz[0])
+    offset = tamanho_mascara // 2
+    total_pixels_mascara = tamanho_mascara * tamanho_mascara
+    
+    # Cria a matriz de saída zerada
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Percorre a imagem ignorando as bordas para evitar erro de índice
+    for y in range(offset, altura - offset):
+        for x in range(offset, largura - offset):
+            soma = 0
+            
+            # Coleta e soma todos os pixels dentro da janela (máscara)
+            for ky in range(tamanho_mascara):
+                for kx in range(tamanho_mascara):
+                    soma += matriz[y - offset + ky][x - offset + kx]
+            
+            # Calcula a média simples
+            media = soma // total_pixels_mascara
+            
+            # Atribui o valor médio ao pixel central
+            saida[y][x] = media
+            
+    return saida
