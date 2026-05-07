@@ -55,6 +55,11 @@ def executar():
     print("\nAplicando Media...")
     img_Media = processamento.passa_baixa_media(matriz_original,tamanho_mascara=3)
     salvar_matriz(img_Media, 'resultado_Media.png')
+
+    print("\nAplicando Soma...")
+    # Usando a imagem original e a imagem do passa-alta gerada anteriormente
+    img_Soma = processamento.somaIMG(matriz_original, img_passa_alta)
+    salvar_matriz(img_Soma, 'resultado_Soma.png')
     
     
     print("\nConcluído com sucesso!")

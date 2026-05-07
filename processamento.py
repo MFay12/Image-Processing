@@ -49,7 +49,7 @@ def threshold(matriz, limiar):
     
     for y in range(altura):
         for x in range(largura):
-            saida[y][x] = 255 if matriz[y][x] > limiar else 0
+            saida[y][x] = 255 if matriz[y][x] > limiar else 0  #Melhorar if para legibilidade
     return saida
 
 def calcular_otsu(matriz):
@@ -189,5 +189,48 @@ def passa_baixa_media(matriz, tamanho_mascara=3):
             
             # Atribui o valor médio ao pixel central
             saida[y][x] = media
+            
+    return saida
+
+def somaIMG(matriz1, matriz2):
+    """Soma duas imagens e normaliza o resultado para o intervalo 0-255."""
+    altura = len(matriz1)
+    largura = len(matriz1[0])
+    
+    # Cria a matriz auxiliar para guardar as somas
+    matrizaux = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Inicializa os valores de referência
+    MaiorValor = 1000
+    MenorValor = -1
+    
+    #Soma pixel a pixel e encontra o maior e menor valor
+    for y in range(altura):
+        for x in range(largura):
+            soma = matriz1[y][x] + matriz2[y][x]
+            matrizaux[y][x] = soma
+            
+            if soma > MaiorValor:
+                MaiorValor = soma
+            if soma < MenorValor:
+                MenorValor = soma
+                
+    # Cria a matriz final que será salva no disco
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Verifica divisão por 0
+    if MaiorValor == MenorValor:
+        return matrizaux    
+    
+    #Normalização pixel a pixel
+    for y in range(altura):
+        for x in range(largura):
+            f = matrizaux[y][x]
+            
+            
+            #Usando 255.0 para o arredondamento não falhar 
+            Pixelaux = (255.0 / (MaiorValor - MenorValor)) * (f - MenorValor)
+            
+            saida[y][x] = int(Pixelaux)
             
     return saida
