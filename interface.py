@@ -30,7 +30,7 @@ def atualizar_interface(*args):
         barra_param.grid(row=0, column=2, padx=(0, 15))
         
     elif filtro == 'Passa-Alta High-Boost':
-        # Mostra a barra e ajusta para o Fator A (ex: de 10 a 30 vira 1.0 a 3.0)
+
         label_barra.config(text="Reforço:")
         barra_param.config(from_=10, to_=30, resolution=1) 
         label_barra.grid(row=0, column=1, padx=(15, 0))
@@ -63,6 +63,17 @@ def aplicar_filtro(*args):
     elif filtro == 'Soma (Original + Passa-Alta)':
         img_passa_alta = processamento.passa_alta_basico(matriz_original)
         resultado = processamento.somaIMG(matriz_original, img_passa_alta)
+    elif filtro == 'Subtração (Original + Passa-Alta)':
+        img_passa_alta = processamento.passa_alta_basico(matriz_original)
+        resultado = processamento.subIMG(matriz_original,img_passa_alta)
+    elif filtro == 'Multiplicação (Original + Passa-Alta)':
+        img_passa_alta = processamento.passa_alta_basico(matriz_original)
+        resultado = processamento.multIMG(matriz_original,img_passa_alta)
+    elif filtro == 'Divisão (Original + Passa-Alta)':
+        img_passa_alta = processamento.passa_alta_basico(matriz_original)
+        resultado = processamento.divIMG(matriz_original,img_passa_alta)
+    elif filtro == 'Negativo':
+        resultado = processamento.negativo(matriz_original)
     else:
         resultado = matriz_original
 
@@ -89,7 +100,11 @@ filtros = [
     'Passa-Alta High-Boost', 
     'Passa-Baixa Média', 
     'Passa-Baixa Mediana', 
-    'Soma (Original + Passa-Alta)'
+    'Soma (Original + Passa-Alta)',
+    'Subtração (Original + Passa-Alta)',
+    'Multiplicação (Original + Passa-Alta)',
+    'Divisão (Original + Passa-Alta)',
+    'Negativo'
 ]
 
 

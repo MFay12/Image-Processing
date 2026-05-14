@@ -201,8 +201,8 @@ def somaIMG(matriz1, matriz2):
     matrizaux = [[0 for _ in range(largura)] for _ in range(altura)]
     
     # Inicializa os valores de referência
-    MaiorValor = 1000
-    MenorValor = -1
+    MaiorValor = -1
+    MenorValor = 1000
     
     #Soma pixel a pixel e encontra o maior e menor valor
     for y in range(altura):
@@ -234,3 +234,151 @@ def somaIMG(matriz1, matriz2):
             saida[y][x] = int(Pixelaux)
             
     return saida
+
+
+def subIMG(matriz1, matriz2):
+    """Subtrai duas imagens e normaliza o resultado para o intervalo 0-255."""
+    altura = len(matriz1)
+    largura = len(matriz1[0])
+    
+    # Cria a matriz auxiliar para guardar a subtração
+    matrizaux = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Inicializa os valores de referência
+    MaiorValor = -1000
+    MenorValor = 1000
+    
+    #subtrai pixel a pixel e encontra o maior e menor valor
+    for y in range(altura):
+        for x in range(largura):
+            sub = matriz1[y][x] - matriz2[y][x]
+            matrizaux[y][x] = sub
+            
+            if sub > MaiorValor:
+                MaiorValor = sub
+            if sub < MenorValor:
+                MenorValor = sub
+                
+    # Cria a matriz final que será salva no disco
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Verifica divisão por 0
+    if MaiorValor == MenorValor:
+        return matrizaux    
+    
+    #Normalização pixel a pixel
+    for y in range(altura):
+        for x in range(largura):
+            f = matrizaux[y][x]
+            
+            
+            #Usando 255.0 para o arredondamento não falhar 
+            Pixelaux = (255.0 / (MaiorValor - MenorValor)) * (f - MenorValor)
+            
+            saida[y][x] = int(Pixelaux)
+            
+    return saida
+
+def multIMG(matriz1, matriz2):
+    """Multiplica duas imagens e normaliza o resultado para o intervalo 0-255."""
+    altura = len(matriz1)
+    largura = len(matriz1[0])
+    
+    # Cria a matriz auxiliar para guardar a subtração
+    matrizaux = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Inicializa os valores de referência
+    MaiorValor = -1
+    MenorValor = 100000
+    
+    #multiplica pixel a pixel e encontra o maior e menor valor
+    for y in range(altura):
+        for x in range(largura):
+            mul = matriz1[y][x] * matriz2[y][x]
+            matrizaux[y][x] = mul
+            
+            if mul > MaiorValor:
+                MaiorValor = mul
+            if mul < MenorValor:
+                MenorValor = mul
+                
+    # Cria a matriz final que será salva no disco
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Verifica divisão por 0
+    if MaiorValor == MenorValor:
+        return matrizaux    
+    
+    #Normalização pixel a pixel
+    for y in range(altura):
+        for x in range(largura):
+            f = matrizaux[y][x]
+            
+            
+            #Usando 255.0 para o arredondamento não falhar 
+            Pixelaux = (255.0 / (MaiorValor - MenorValor)) * (f - MenorValor)
+            
+            saida[y][x] = int(Pixelaux)
+            
+    return saida
+
+def divIMG(matriz1, matriz2):
+    """Divide duas imagens e normaliza o resultado para o intervalo 0-255."""
+    altura = len(matriz1)
+    largura = len(matriz1[0])
+    
+    # Cria a matriz auxiliar para guardar a divisão
+    matrizaux = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Inicializa os valores de referência
+    MaiorValor = -1
+    MenorValor = 1000
+    
+    #divide pixel a pixel e encontra o maior e menor valor
+    for y in range(altura):
+        for x in range(largura):
+            if matriz2[y][x] == 0:
+                div = 255
+            else:
+                div = matriz1[y][x] / matriz2[y][x]
+            matrizaux[y][x] = div
+            
+            if div > MaiorValor:
+                MaiorValor = div
+            if div < MenorValor:
+                MenorValor = div
+                
+    # Cria a matriz final que será salva no disco
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    # Verifica divisão por 0
+    if MaiorValor == MenorValor:
+        return matrizaux    
+    
+    #Normalização pixel a pixel
+    for y in range(altura):
+        for x in range(largura):
+            f = matrizaux[y][x]
+            
+            
+            #Usando 255.0 para o arredondamento não falhar 
+            Pixelaux = (255.0 / (MaiorValor - MenorValor)) * (f - MenorValor)
+            
+            saida[y][x] = int(Pixelaux)
+            
+    return saida
+
+def negativo(matriz):
+    "Faz o negativo da imagem usando a fórmula 255 - px"
+    altura = len(matriz)
+    largura = len(matriz[0])
+    
+    # Cria a matriz auxiliar para guardar a subtração
+    matrizaux = [[0 for _ in range(largura)] for _ in range(altura)]
+
+    for y in range(altura):
+        for x in range(largura):
+            f = matriz[y][x]
+            matrizaux[y][x] =  255 - f
+        
+    return matrizaux
