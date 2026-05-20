@@ -334,9 +334,10 @@ def divIMG(matriz1, matriz2):
     MaiorValor = -1
     MenorValor = 1000
     
-    #divide pixel a pixel e encontra o maior e menor valor
+    #Divide pixel a pixel e encontra o maior e menor valor
     for y in range(altura):
         for x in range(largura):
+        #Verifica se é 0, se for é transformado em 255
             if matriz2[y][x] == 0:
                 div = 255
             else:
@@ -351,7 +352,7 @@ def divIMG(matriz1, matriz2):
     # Cria a matriz final que será salva no disco
     saida = [[0 for _ in range(largura)] for _ in range(altura)]
     
-    # Verifica divisão por 0
+    # Verifica divisão por 0 na fórmula
     if MaiorValor == MenorValor:
         return matrizaux    
     
@@ -382,3 +383,72 @@ def negativo(matriz):
             matrizaux[y][x] =  255 - f
         
     return matrizaux
+
+import math #Para o uso da função de log em py
+def T_log(matriz):
+    """Aplica a transformação logarítmica s = c * log(1 + r)"""
+    altura = len(matriz)
+    largura = len(matriz[0])
+    
+    # Cria a matriz de saída zerada
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    #Encontrar o maior valor da imagem para calcular a constante 'c'
+    MaiorValor = -1
+    for y in range(altura):
+        for x in range(largura):
+            if matriz[y][x] > MaiorValor:
+                MaiorValor = matriz[y][x]
+                
+    print(MaiorValor)            
+    # Se a imagem for totalmente preta (MaiorValor == 0), retorna ela mesma
+    if MaiorValor == 0:
+        return saida
+        
+    # Calcula a constante 'c' para garantir que o brilho máximo não passe de 255
+    # Fórmula de c: 255 / log(1 + MaiorValor)
+    c = 255.0 / math.log(1 + MaiorValor)
+    
+    #Aplica a fórmula do Gonzalez pixel a pixel
+    for y in range(altura):
+        for x in range(largura):
+            r = matriz[y][x]
+            
+            # s = c * log(1 + r)
+            s = c * math.log(1 + r)
+            
+            saida[y][x] = int(s)
+            
+    return saida
+
+
+def equalizar_histograma(matriz):
+    altura = len(matriz)
+    largura = len(matriz[0])
+    total_pixels = altura * largura # Isso é o 'n' da fórmula
+    
+    
+    #Histograma da função calcular_histograma
+    hist = calcular_histograma(matriz) 
+    
+    #Calcula as probabilidades e a soma acumulada 
+    probabilidade_acumulada = 0.0
+    mapa_de_cores = [0] * 256
+    
+    for k in range(256):
+        probabilidade_atual = hist[k] / total_pixels # Isso é o (n_j / n)
+        
+        probabilidade_acumulada += probabilidade_atual #Acumulando a Probabilidade
+        
+        #Multiplica por 255 e arredonda para achar a nova cor
+        nova_cor = int(probabilidade_acumulada * 255)
+        mapa_de_cores[k] = nova_cor
+        
+    #Cria a matriz de saída varrendo a imagem original e trocando as cores
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    for y in range(altura):
+        for x in range(largura):
+            cor_antiga = matriz[y][x]
+            saida[y][x] = mapa_de_cores[cor_antiga]
+            
+    return saida

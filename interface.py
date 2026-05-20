@@ -74,6 +74,10 @@ def aplicar_filtro(*args):
         resultado = processamento.divIMG(matriz_original,img_passa_alta)
     elif filtro == 'Negativo':
         resultado = processamento.negativo(matriz_original)
+    elif filtro == 'Transformação Logarítimica':
+        resultado = processamento.T_log(matriz_original)
+    elif filtro == 'Equalizador':
+        resultado = processamento.equalizar_histograma(matriz_original)
     else:
         resultado = matriz_original
 
@@ -104,7 +108,9 @@ filtros = [
     'Subtração (Original + Passa-Alta)',
     'Multiplicação (Original + Passa-Alta)',
     'Divisão (Original + Passa-Alta)',
-    'Negativo'
+    'Negativo',
+    'Transformação Logarítimica',
+    'Equalizador'
 ]
 
 
