@@ -452,3 +452,63 @@ def equalizar_histograma(matriz):
             saida[y][x] = mapa_de_cores[cor_antiga]
             
     return saida
+
+def crescimento_regioes(matriz, semente_x, semente_y, tolerancia):
+    """
+    Segmenta uma região da imagem a partir de um ponto inicial.
+    Retorna uma matriz binarizada (fundo preto = 0, região = 255).
+    """
+    altura = len(matriz)
+    largura = len(matriz[0])
+    
+    #Cria a matriz de saída toda preta (0)
+    saida = [[0 for _ in range(largura)] for _ in range(altura)]
+    
+    #Matriz de segurança para o código não entrar em loop infinito 
+    #(garante que não vamos avaliar o mesmo pixel duas vezes)
+    visitados = [[False for _ in range(largura)] for _ in range(altura)]
+    
+    #Guarda a cor original do pixel que o usuário clicou
+    cor_referencia = matriz[semente_y][semente_x]
+    
+    # 3. Inicia a Fila de Espera com a coordenada da semente
+    fila = [(semente_x, semente_y)]
+    visitados[semente_y][semente_x] = True
+    saida[semente_y][semente_x] = 255 # Pinta a semente de branco na saída
+    
+    # Dicionário de movimentos (Direita, Esquerda, Baixo, Cima)
+    movimentos = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    
+    # 4. O motor do algoritmo: enquanto houver pixels na fila de espera...
+    while len(fila) > 0:
+        # Tira o primeiro pixel da fila para analisar
+        x_atual, y_atual = fila.pop(0) 
+        
+        # Olha para os 4 vizinhos dele
+        for dx, dy in movimentos:
+            nx = x_atual + dx
+            ny = y_atual + dy
+            
+            # Verifica se o vizinho não caiu fora das bordas da imagem
+            if 0 <= nx < largura and 0 <= ny < altura:
+                
+                # Se o vizinho ainda não foi visitado por nós...
+                if not visitados[ny][nx]:
+                    cor_vizinho = matriz[ny][nx]
+                    
+                    # A REGRA DE OURO: A diferença de cor está dentro da tolerância?
+                    if abs(cor_vizinho - cor_referencia) <= tolerancia:
+                        
+                        saida[ny][nx] = 255       # Pinta de branco na saída
+                        visitados[ny][nx] = True  # Marca como visitado
+                        fila.append((nx, ny))     # Coloca ele na fila para checar os vizinhos dele depois!
+
+                # Conta quantos pixels brancos existem na matriz final
+    total_brancos = 0
+    for linha in saida:
+        total_brancos += linha.count(255)
+        
+    print(f"Alarme: Clique em X:{semente_x} Y:{semente_y} | Cor do pixel: {cor_referencia}")
+    print(f"Alarme: A região pintou {total_brancos} pixels de branco!")
+
+    return saida

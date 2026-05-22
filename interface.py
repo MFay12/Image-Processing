@@ -78,6 +78,11 @@ def aplicar_filtro(*args):
         resultado = processamento.T_log(matriz_original)
     elif filtro == 'Equalizador':
         resultado = processamento.equalizar_histograma(matriz_original)
+    elif filtro == 'Crescimento de Regiões':
+        label_barra.config(text="Tolerância de Cor:")
+        barra_param.config(from_=3, to_=20, resolution=1) # Tolerância de 3 a 20 tons de cinza
+        label_barra.grid(row=0, column=1, padx=(15, 0))
+        barra_param.grid(row=0, column=2, padx=(0, 15))    
     else:
         resultado = matriz_original
 
@@ -85,6 +90,25 @@ def aplicar_filtro(*args):
     img_tk = ImageTk.PhotoImage(img_pil)
     label_imagem.config(image=img_tk)
     label_imagem.image = img_tk 
+
+def clicar_na_imagem(evento):
+    """Captura o X e Y do clique do mouse e roda o Crescimento de Regiões."""
+    filtro = combo_filtros.get()
+    
+    # Só faz alguma coisa se o filtro selecionado for o Crescimento
+    if filtro == 'Crescimento de Regiões':
+        semente_x = evento.x
+        semente_y = evento.y
+        tolerancia = int(barra_param.get())
+        
+        
+        resultado = processamento.crescimento_regioes(matriz_original, semente_x, semente_y, tolerancia)
+        
+        # Desenha a imagem binarizada (preto e branco) na tela
+        img_pil = matriz_para_pil(resultado)
+        img_tk = ImageTk.PhotoImage(img_pil)
+        label_imagem.config(image=img_tk)
+        label_imagem.image = img_tk
 
 # ==========================================
 # CONSTRUÇÃO DA JANELA VISUAL
@@ -110,7 +134,8 @@ filtros = [
     'Divisão (Original + Passa-Alta)',
     'Negativo',
     'Transformação Logarítimica',
-    'Equalizador'
+    'Equalizador',
+    'Crescimento de Regiões'
 ]
 
 
@@ -131,5 +156,6 @@ barra_param.grid_remove()
 img_tk_inicial = ImageTk.PhotoImage(matriz_para_pil(matriz_original))
 label_imagem = tk.Label(janela, image=img_tk_inicial)
 label_imagem.pack(expand=True)
+label_imagem.bind("<Button-1>", clicar_na_imagem)
 
 janela.mainloop()
